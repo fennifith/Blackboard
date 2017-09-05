@@ -42,7 +42,7 @@ public class HomeFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
-        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        final Toolbar toolbar = view.findViewById(R.id.toolbar);
         drawerLayout = view.findViewById(R.id.drawerLayout);
         coursesLayout = view.findViewById(R.id.courses);
         username = view.findViewById(R.id.username);
@@ -131,6 +131,8 @@ public class HomeFragment extends BaseFragment {
                                 @Override
                                 public void onClick(View view) {
                                     if (view.getTag() != null && view.getTag() instanceof String) {
+                                        toolbar.setTitle(((TextView) view.findViewById(R.id.title)).getText().toString());
+                                        drawerLayout.closeDrawer(GravityCompat.START);
                                         getBlackboard().callFunction((String) view.getTag(), new ValueCallback<String>() {
                                             @Override
                                             public void onReceiveValue(String s) {
