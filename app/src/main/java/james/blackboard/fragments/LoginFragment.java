@@ -116,7 +116,6 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
             getBlackboard().callFunctionByName("login", 0, "submit", new ValueCallback<String>() {
                 @Override
                 public void onReceiveValue(String s) {
-                    Toast.makeText(getContext(), "submitted", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -131,7 +130,6 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
         setLoading(false);
 
         if (isLoginUrl(url)) {
-            //TODO: error message
             if (hasLogin)
                 Toast.makeText(getContext(), "Login failed!", Toast.LENGTH_SHORT).show();
         } else if (url.contains("/webapps/portal")) {

@@ -1,16 +1,11 @@
 package james.blackboard.fragments;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
-import android.util.JsonReader;
-import android.util.JsonToken;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.ValueCallback;
@@ -23,21 +18,23 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import james.blackboard.R;
+import james.blackboard.utils.scrapers.BaseScraper;
+import james.blackboard.utils.scrapers.CourseScraper;
+import james.blackboard.utils.scrapers.UsernameScraper;
 
-public class HomeFragment extends BaseFragment implements Toolbar.OnMenuItemClickListener {
+public class HomeFragment extends BaseFragment {
 
     private DrawerLayout drawerLayout;
-    private LinearLayout drawer;
+    private LinearLayout coursesLayout;
     private TextView username;
+    private ImageView logout;
+    private TextView url;
 
-    private Handler handler;
-    private Runnable courseRunnable;
+    private BaseScraper courseScraper;
 
     @Nullable
     @Override
@@ -45,8 +42,10 @@ public class HomeFragment extends BaseFragment implements Toolbar.OnMenuItemClic
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         drawerLayout = view.findViewById(R.id.drawerLayout);
-        drawer = view.findViewById(R.id.drawer);
+        coursesLayout = view.findViewById(R.id.courses);
         username = view.findViewById(R.id.username);
+        url = view.findViewById(R.id.url);
+        logout = view.findViewById(R.id.logout);
 
         toolbar.setNavigationIcon(R.drawable.ic_drawer);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -56,47 +55,48 @@ public class HomeFragment extends BaseFragment implements Toolbar.OnMenuItemClic
             }
         });
 
-        handler = new Handler();
-        courseRunnable = new Runnable() {
+        url.setText(getBlackboard().getFullUrl());
 
+        logout.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void run() {
-                getBlackboard().getCourses(new ValueCallback<String>() {
+            public void onClick(View view) {
+                getBlackboard().callFunction("topframe.logout.label", "click", new ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String s) {
+                    }
+                });
+            }
+        });
+
+        new UsernameScraper(getBlackboard())
+                .addCallback(new BaseScraper.ScrapeCallback() {
+                    @Override
+                    public void onComplete(BaseScraper scraper, String s) {
+                        username.setText(s);
+                    }
+
+                    @Override
+                    public void onError(BaseScraper scraper, boolean fatal) {
+
+                    }
+                })
+                .scrape();
+
+        courseScraper = new CourseScraper(getBlackboard())
+                .addCallback(new BaseScraper.ScrapeCallback() {
 
                     private List<String> courses;
 
                     @Override
-                    public void onReceiveValue(String s) {
+                    public void onComplete(BaseScraper scraper, String s) {
                         courses = new ArrayList<>();
+                        Document document = Jsoup.parseBodyFragment(s);
+                        coursesLayout.removeAllViews();
+                        getChildren(document.getAllElements());
+                    }
 
-                        JsonReader reader = new JsonReader(new StringReader(s));
-                        reader.setLenient(true);
-
-                        try {
-                            if(reader.peek() != JsonToken.NULL) {
-                                if (reader.peek() == JsonToken.STRING) {
-                                    s = reader.nextString();
-                                    Document document = Jsoup.parseBodyFragment(s);
-                                    getChildren(document.getAllElements());
-                                    if (courses.size() > 0)
-                                        return;
-                                }
-                            }
-                        } catch (Exception ignored) {
-                        }
-
-                        try {
-                            reader.close();
-                        } catch (IOException ignored) {
-                        }
-
-                        getBlackboard().callFunction("global-nav-link", "click", new ValueCallback<String>() {
-                            @Override
-                            public void onReceiveValue(String s) {
-                            }
-                        });
-
-                        handler.postDelayed(courseRunnable, 1000);
+                    @Override
+                    public void onError(BaseScraper scraper, boolean fatal) {
                     }
 
                     public void getChildren(Elements children) {
@@ -113,7 +113,7 @@ public class HomeFragment extends BaseFragment implements Toolbar.OnMenuItemClic
                         if (courses.contains(element.text()))
                             return;
 
-                        View view = LayoutInflater.from(getContext()).inflate(R.layout.item_drawer, drawer, false);
+                        View view = LayoutInflater.from(getContext()).inflate(R.layout.item_drawer, coursesLayout, false);
                         ImageView icon = view.findViewById(R.id.icon);
                         TextView title = view.findViewById(R.id.title);
 
@@ -125,42 +125,20 @@ public class HomeFragment extends BaseFragment implements Toolbar.OnMenuItemClic
                             title.setText(element.text());
                         }
 
-                        drawer.addView(view);
+                        coursesLayout.addView(view);
 
                         courses.add(element.text());
                     }
-                });
-            }
-        };
 
-        handler.postDelayed(courseRunnable, 1000);
+                });
+
+        courseScraper.scrape();
 
         return view;
     }
 
     @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_logout:
-                getBlackboard().callFunction("topframe.logout.label", "click", new ValueCallback<String>() {
-                    @Override
-                    public void onReceiveValue(String s) {
-                    }
-                });
-                break;
-        }
-        return false;
-    }
-
-    @Override
     public void onPageFinished(String url) {
-        getBlackboard().getAttribute("global-nav-link", "text", new ValueCallback<String>() {
-            @Override
-            public void onReceiveValue(String s) {
-                username.setText(s);
-            }
-        });
-
         if (LoginFragment.isLoginUrl(url)) {
             getFragmentManager().beginTransaction()
                     .replace(R.id.fragment, new LoginFragment())
