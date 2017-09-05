@@ -36,4 +36,8 @@ public abstract class BaseFragment extends Fragment implements Blackboard.Blackb
     public void onRequest(String url) {
 
     }
+
+    public String getTitle() {
+        return "";
+    }
 }

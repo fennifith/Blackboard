@@ -10,19 +10,18 @@ import java.io.StringReader;
 
 import james.blackboard.Blackboard;
 
-public class CourseScraper extends BaseScraper {
+public class CourseMenuScraper extends BaseScraper {
 
     private Handler handler;
     private Runnable runnable;
 
-    public CourseScraper(Blackboard blackboard) {
+    public CourseMenuScraper(Blackboard blackboard) {
         super(blackboard);
         handler = new Handler();
         runnable = new Runnable() {
-
             @Override
             public void run() {
-                getBlackboard().getHtmlContent("CourseNavMenuSection.Course-content", new ValueCallback<String>() {
+                getBlackboard().getHtmlContent("courseMenuPalette_contents", new ValueCallback<String>() {
                     @Override
                     public void onReceiveValue(String s) {
                         JsonReader reader = new JsonReader(new StringReader(s));
@@ -40,12 +39,6 @@ public class CourseScraper extends BaseScraper {
                             reader.close();
                         } catch (IOException ignored) {
                         }
-
-                        getBlackboard().callFunction("global-nav-link", "click", new ValueCallback<String>() {
-                            @Override
-                            public void onReceiveValue(String s) {
-                            }
-                        });
 
                         if (!isComplete()) {
                             onError(false);

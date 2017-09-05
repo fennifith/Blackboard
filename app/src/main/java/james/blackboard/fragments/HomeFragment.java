@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,7 @@ public class HomeFragment extends BaseFragment {
     private TextView url;
 
     private BaseScraper courseScraper;
+    private BaseFragment fragment;
 
     @Nullable
     @Override
@@ -123,6 +125,31 @@ public class HomeFragment extends BaseFragment {
                         } else if (element.tagName().equals("a")) {
                             icon.setImageResource(R.drawable.ic_class);
                             title.setText(element.text());
+                            String onclick = element.attributes().get("onclick").replace("return false;", "");
+                            view.setTag(onclick.substring(0, onclick.length() - 1));
+                            view.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    if (view.getTag() != null && view.getTag() instanceof String) {
+                                        getBlackboard().callFunction((String) view.getTag(), new ValueCallback<String>() {
+                                            @Override
+                                            public void onReceiveValue(String s) {
+                                                boolean shouldAdd = fragment == null;
+                                                fragment = new CourseFragment();
+                                                if (shouldAdd) {
+                                                    getChildFragmentManager().beginTransaction()
+                                                            .add(R.id.fragment, fragment)
+                                                            .commit();
+                                                } else {
+                                                    getChildFragmentManager().beginTransaction()
+                                                            .replace(R.id.fragment, fragment)
+                                                            .commit();
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            });
                         }
 
                         coursesLayout.addView(view);
@@ -139,6 +166,7 @@ public class HomeFragment extends BaseFragment {
 
     @Override
     public void onPageFinished(String url) {
+        Log.d("URL", url);
         if (LoginFragment.isLoginUrl(url)) {
             getFragmentManager().beginTransaction()
                     .replace(R.id.fragment, new LoginFragment())

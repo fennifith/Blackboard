@@ -63,8 +63,8 @@ public class Blackboard extends Application {
         webView.evaluateJavascript("(function(){return document.getElementById('body')[0].innerHTML;})();", callback);
     }
 
-    public void getCourses(ValueCallback<String> callback) {
-        webView.evaluateJavascript("(function(){return document.getElementById('CourseNavMenuSection.Course-content').innerHTML;})()", callback);
+    public void getHtmlContent(String id, ValueCallback<String> callback) {
+        webView.evaluateJavascript("(function(){return document.getElementById('" + id + "').innerHTML;})()", callback);
     }
 
     public void setAttribute(String id, String attribute, String value) {
@@ -77,6 +77,10 @@ public class Blackboard extends Application {
 
     public void getAttribute(String id, String attribute, ValueCallback<String> callback) {
         webView.evaluateJavascript("(function(){return document.getElementById('" + id + "')." + attribute + ";})()", callback);
+    }
+
+    public void callFunction(String function, ValueCallback<String> callback) {
+        webView.evaluateJavascript("(function(){" + function + "})()", callback);
     }
 
     public void callFunction(String id, String function, ValueCallback<String> callback) {
