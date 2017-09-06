@@ -18,9 +18,10 @@ import java.util.List;
 
 import james.blackboard.R;
 import james.blackboard.adapters.ContentsAdapter;
-import james.blackboard.data.ContentData;
-import james.blackboard.data.FolderContentData;
-import james.blackboard.data.WebLinkData;
+import james.blackboard.data.content.ContentData;
+import james.blackboard.data.content.FileContentData;
+import james.blackboard.data.content.FolderContentData;
+import james.blackboard.data.content.WebLinkContentData;
 import james.blackboard.utils.scrapers.BaseScraper;
 import james.blackboard.utils.scrapers.ContentScraper;
 
@@ -79,7 +80,7 @@ public class ContentFragment extends BaseFragment {
 
     @Override
     public void onPageFinished(String url) {
-        if (isSelected() && isCreated) {
+        if (isSelected() && isCreated && scraper == null || scraper.isCancelled() || scraper.isComplete()) {
             scraper = new ContentScraper(getBlackboard())
                     .addCallback(new BaseScraper.ScrapeCallback() {
 
@@ -119,10 +120,13 @@ public class ContentFragment extends BaseFragment {
                                 ContentData content;
                                 switch (type) {
                                     case "Web Link":
-                                        content = new WebLinkData(title, description, element.getElementsByTag("a").get(0).attr("href"));
+                                        content = new WebLinkContentData(title, description, element.getElementsByTag("a").get(0).attr("href"));
                                         break;
                                     case "Content Folder":
                                         content = new FolderContentData(title, description, element.getElementsByTag("a").get(0).attr("href"));
+                                        break;
+                                    case "File":
+                                        content = new FileContentData(title, description, getBlackboard().getFullUrl() + element.getElementsByTag("a").get(0).attr("href"));
                                         break;
                                     default:
                                         content = new ContentData(title, description);

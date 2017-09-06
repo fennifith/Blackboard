@@ -67,7 +67,7 @@ public class CourseFragment extends BaseFragment {
 
                     public void addFragment(Element element) {
                         String text = element.text();
-                        if (strings.contains(text) || text.equals("Home Page"))
+                        if (strings.contains(text) || text.equals("Home Page") || text.equals("Help"))
                             return;
 
                         ContentFragment fragment = new ContentFragment();

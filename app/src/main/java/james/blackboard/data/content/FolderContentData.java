@@ -1,4 +1,4 @@
-package james.blackboard.data;
+package james.blackboard.data.content;
 
 public class FolderContentData extends ContentData {
 

@@ -12,9 +12,10 @@ import android.widget.TextView;
 import java.util.List;
 
 import james.blackboard.R;
-import james.blackboard.data.ContentData;
-import james.blackboard.data.FolderContentData;
-import james.blackboard.data.WebLinkData;
+import james.blackboard.data.content.ContentData;
+import james.blackboard.data.content.FileContentData;
+import james.blackboard.data.content.FolderContentData;
+import james.blackboard.data.content.WebLinkContentData;
 
 public class ContentsAdapter extends RecyclerView.Adapter<ContentsAdapter.ViewHolder> {
 
@@ -42,7 +43,7 @@ public class ContentsAdapter extends RecyclerView.Adapter<ContentsAdapter.ViewHo
         switch (getItemViewType(position)) {
             case 1:
                 holder.image.setImageResource(R.drawable.ic_link);
-                holder.itemView.setTag(((WebLinkData) content).url);
+                holder.itemView.setTag(((WebLinkContentData) content).url);
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -61,6 +62,17 @@ public class ContentsAdapter extends RecyclerView.Adapter<ContentsAdapter.ViewHo
                     }
                 });
                 break;
+            case 3:
+                holder.image.setImageResource(R.drawable.ic_file);
+                holder.itemView.setTag(((FileContentData) content).url);
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (view.getTag() != null && view.getTag() instanceof String)
+                            view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse((String) view.getTag())));
+                    }
+                });
+                break;
             default:
                 holder.image.setImageResource(R.drawable.ic_message);
                 break;
@@ -69,10 +81,12 @@ public class ContentsAdapter extends RecyclerView.Adapter<ContentsAdapter.ViewHo
 
     @Override
     public int getItemViewType(int position) {
-        if (contents.get(position) instanceof WebLinkData)
+        if (contents.get(position) instanceof WebLinkContentData)
             return 1;
         else if (contents.get(position) instanceof FolderContentData)
             return 2;
+        else if (contents.get(position) instanceof FileContentData)
+            return 3;
 
         return 0;
     }
