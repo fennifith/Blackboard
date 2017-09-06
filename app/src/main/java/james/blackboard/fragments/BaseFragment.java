@@ -9,6 +9,7 @@ import james.blackboard.Blackboard;
 public abstract class BaseFragment extends Fragment implements Blackboard.BlackboardListener {
 
     private Blackboard blackboard;
+    private boolean isSelected;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,5 +40,26 @@ public abstract class BaseFragment extends Fragment implements Blackboard.Blackb
 
     public String getTitle() {
         return "";
+    }
+
+    void onSelect() {
+
+    }
+
+    void onDeselect() {
+
+    }
+
+    public final void setSelected(boolean isSelected) {
+        if (this.isSelected != isSelected) {
+            this.isSelected = isSelected;
+            if (isSelected)
+                onSelect();
+            else onDeselect();
+        }
+    }
+
+    public final boolean isSelected() {
+        return isSelected;
     }
 }

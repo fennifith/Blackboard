@@ -10,19 +10,19 @@ import java.io.StringReader;
 
 import james.blackboard.Blackboard;
 
-public class CourseMenuScraper extends BaseScraper {
+public class ContentScraper extends BaseScraper {
 
     private Handler handler;
     private Runnable runnable;
 
-    public CourseMenuScraper(Blackboard blackboard) {
+    public ContentScraper(Blackboard blackboard) {
         super(blackboard);
         handler = new Handler();
         runnable = new Runnable() {
             @Override
             public void run() {
                 if (!isCancelled()) {
-                    getBlackboard().getHtmlContent("courseMenuPalette_contents", new ValueCallback<String>() {
+                    getBlackboard().getHtmlContent("content_listContainer", new ValueCallback<String>() {
                         @Override
                         public void onReceiveValue(String s) {
                             JsonReader reader = new JsonReader(new StringReader(s));

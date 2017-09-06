@@ -49,7 +49,7 @@ public class CourseFragment extends BaseFragment {
                         getChildren(document.getAllElements());
                         if (fragments.size() > 0) {
                             tabLayout.setupWithViewPager(viewPager);
-                            viewPager.setAdapter(new SimplePagerAdapter(getChildFragmentManager(), fragments.toArray(new BaseFragment[fragments.size()])));
+                            viewPager.setAdapter(new SimplePagerAdapter(viewPager, getChildFragmentManager(), fragments.toArray(new BaseFragment[fragments.size()])));
                         }
                     }
 
@@ -69,15 +69,11 @@ public class CourseFragment extends BaseFragment {
 
                     public void addFragment(Element element) {
                         String text = element.text();
-                        if (strings.contains(text))
+                        if (strings.contains(text) || text.equals("Home Page"))
                             return;
 
-                        Bundle args = new Bundle();
-                        args.putString(ContentFragment.EXTRA_TITLE, text);
-
                         ContentFragment fragment = new ContentFragment();
-                        fragment.setArguments(args);
-                        fragment.setTitle(text);
+                        fragment.setData(text, getBlackboard().getFullUrl() + element.attr("href"));
 
                         fragments.add(fragment);
                         strings.add(text);

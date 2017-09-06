@@ -22,37 +22,39 @@ public class CourseScraper extends BaseScraper {
 
             @Override
             public void run() {
-                getBlackboard().getHtmlContent("CourseNavMenuSection.Course-content", new ValueCallback<String>() {
-                    @Override
-                    public void onReceiveValue(String s) {
-                        JsonReader reader = new JsonReader(new StringReader(s));
-                        reader.setLenient(true);
+                if (!isCancelled()) {
+                    getBlackboard().getHtmlContent("CourseNavMenuSection.Course-content", new ValueCallback<String>() {
+                        @Override
+                        public void onReceiveValue(String s) {
+                            JsonReader reader = new JsonReader(new StringReader(s));
+                            reader.setLenient(true);
 
-                        try {
-                            if (reader.peek() != JsonToken.NULL) {
-                                if (reader.peek() == JsonToken.STRING)
-                                    onComplete(reader.nextString());
+                            try {
+                                if (reader.peek() != JsonToken.NULL) {
+                                    if (reader.peek() == JsonToken.STRING)
+                                        onComplete(reader.nextString());
+                                }
+                            } catch (Exception ignored) {
                             }
-                        } catch (Exception ignored) {
-                        }
 
-                        try {
-                            reader.close();
-                        } catch (IOException ignored) {
-                        }
-
-                        getBlackboard().callFunction("global-nav-link", "click", new ValueCallback<String>() {
-                            @Override
-                            public void onReceiveValue(String s) {
+                            try {
+                                reader.close();
+                            } catch (IOException ignored) {
                             }
-                        });
 
-                        if (!isComplete()) {
-                            onError(false);
-                            handler.postDelayed(runnable, 1000);
+                            getBlackboard().callFunction("global-nav-link", "click", new ValueCallback<String>() {
+                                @Override
+                                public void onReceiveValue(String s) {
+                                }
+                            });
+
+                            if (!isComplete()) {
+                                onError(false);
+                                handler.postDelayed(runnable, 1000);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         };
     }
@@ -61,5 +63,11 @@ public class CourseScraper extends BaseScraper {
     public void scrape() {
         super.scrape();
         handler.postDelayed(runnable, 500);
+    }
+
+    @Override
+    public void cancel() {
+        super.cancel();
+        handler.removeCallbacks(runnable);
     }
 }

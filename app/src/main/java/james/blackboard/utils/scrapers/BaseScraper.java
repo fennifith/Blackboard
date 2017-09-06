@@ -1,5 +1,7 @@
 package james.blackboard.utils.scrapers;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +13,7 @@ public abstract class BaseScraper {
     private List<ScrapeCallback> callbacks;
 
     private boolean isComplete;
+    private boolean isCancelled;
 
     public BaseScraper(Blackboard blackboard) {
         this.blackboard = blackboard;
@@ -32,6 +35,15 @@ public abstract class BaseScraper {
 
     public void scrape() {
         isComplete = false;
+        isCancelled = false;
+    }
+
+    public void cancel() {
+        isCancelled = true;
+    }
+
+    public final boolean isCancelled() {
+        return isCancelled;
     }
 
     final Blackboard getBlackboard() {
@@ -39,15 +51,20 @@ public abstract class BaseScraper {
     }
 
     final void onComplete(String s) {
-        isComplete = true;
-        for (ScrapeCallback callback : callbacks) {
-            callback.onComplete(this, s);
+        if (!isCancelled) {
+            isComplete = true;
+            for (ScrapeCallback callback : callbacks) {
+                callback.onComplete(this, s);
+            }
         }
     }
 
     final void onError(boolean fatal) {
-        for (ScrapeCallback callback : callbacks) {
-            callback.onError(this, fatal);
+        if (!isCancelled) {
+            Log.e(getClass().getName(), "onError(" + String.valueOf(fatal) + ")");
+            for (ScrapeCallback callback : callbacks) {
+                callback.onError(this, fatal);
+            }
         }
     }
 
