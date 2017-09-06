@@ -27,15 +27,17 @@ public class Blackboard extends Application {
     private WebView webView;
 
     private List<BlackboardListener> listeners;
+    private List<ProgressListener> progressListeners;
 
     @Override
     public void onCreate() {
         super.onCreate();
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         listeners = new ArrayList<>();
+        progressListeners = new ArrayList<>();
         webView = new WebView(this);
         webView.setWebViewClient(new WebClient(this));
-        webView.setWebChromeClient(new ChromeClient());
+        webView.setWebChromeClient(new ChromeClient(this));
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadsImagesAutomatically(false);
@@ -112,9 +114,27 @@ public class Blackboard extends Application {
         }
     }
 
+    public void addListener(ProgressListener listener) {
+        progressListeners.add(listener);
+    }
+
+    public void removeListener(ProgressListener listener) {
+        progressListeners.remove(listener);
+    }
+
+    private void onProgressChanged(int progress) {
+        for (ProgressListener listener : progressListeners) {
+            listener.onProgressChanged(progress);
+        }
+    }
+
     public interface BlackboardListener {
         void onPageFinished(String url);
         void onRequest(String url);
+    }
+
+    public interface ProgressListener {
+        void onProgressChanged(int progress);
     }
 
     private static class WebClient extends WebViewClient {
@@ -145,5 +165,16 @@ public class Blackboard extends Application {
     }
 
     private static class ChromeClient extends WebChromeClient {
+
+        private Blackboard blackboard;
+
+        public ChromeClient(Blackboard blackboard) {
+            this.blackboard = blackboard;
+        }
+
+        @Override
+        public void onProgressChanged(WebView view, int newProgress) {
+            blackboard.onProgressChanged(newProgress);
+        }
     }
 }

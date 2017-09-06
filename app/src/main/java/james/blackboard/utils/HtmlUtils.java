@@ -15,9 +15,6 @@ public class HtmlUtils {
                 removeUselessElements(child);
             else {
                 switch (child.tagName()) {
-                    case "img":
-                        if (child.hasAttr("src") && !child.attr("src").startsWith("/"))
-                            break;
                     case "br":
                     case "a":
                     case "p":
@@ -26,8 +23,6 @@ public class HtmlUtils {
                     case "h3":
                     case "h4":
                     case "span":
-                    case "ul":
-                    case "li":
                         break;
                     default:
                         Element parent = child.parent();
