@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,7 +41,6 @@ public class CourseFragment extends BaseFragment {
 
                     @Override
                     public void onComplete(BaseScraper scraper, String s) {
-                        Log.d("HTML", s);
                         strings = new ArrayList<>();
                         fragments = new ArrayList<>();
                         Document document = Jsoup.parseBodyFragment(s);
@@ -73,7 +71,7 @@ public class CourseFragment extends BaseFragment {
                             return;
 
                         ContentFragment fragment = new ContentFragment();
-                        fragment.setData(text, getBlackboard().getFullUrl() + element.attr("href"));
+                        fragment.setData(text, element.attr("href"));
 
                         fragments.add(fragment);
                         strings.add(text);
