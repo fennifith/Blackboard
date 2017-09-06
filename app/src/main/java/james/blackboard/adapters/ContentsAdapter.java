@@ -3,6 +3,8 @@ package james.blackboard.adapters;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,7 +44,8 @@ public class ContentsAdapter extends RecyclerView.Adapter<ContentsAdapter.ViewHo
                 AnnouncementContentData announcement = (AnnouncementContentData) contents.get(position);
 
                 holder.title.setText(announcement.title);
-                holder.description.setText(announcement.description);
+                holder.description.setText(Html.fromHtml(announcement.description));
+                holder.description.setMovementMethod(LinkMovementMethod.getInstance());
                 announcementHolder.date.setText(announcement.date);
                 break;
             default:
@@ -51,7 +54,8 @@ public class ContentsAdapter extends RecyclerView.Adapter<ContentsAdapter.ViewHo
 
                 if (content.description.length() > 0) {
                     holder.description.setVisibility(View.VISIBLE);
-                    holder.description.setText(content.description);
+                    holder.description.setText(Html.fromHtml(content.description));
+                    holder.description.setMovementMethod(getItemViewType(position) == 0 ? LinkMovementMethod.getInstance() : null);
                 } else holder.description.setVisibility(View.GONE);
 
                 switch (getItemViewType(position)) {

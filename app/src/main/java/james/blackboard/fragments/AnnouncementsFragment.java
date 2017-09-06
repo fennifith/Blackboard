@@ -21,6 +21,7 @@ import james.blackboard.adapters.ContentsAdapter;
 import james.blackboard.data.content.AnnouncementContentData;
 import james.blackboard.data.content.ContentData;
 import james.blackboard.data.content.WebLinkContentData;
+import james.blackboard.utils.HtmlUtils;
 import james.blackboard.utils.scrapers.AnnouncementsScraper;
 import james.blackboard.utils.scrapers.BaseScraper;
 
@@ -88,6 +89,7 @@ public class AnnouncementsFragment extends BaseFragment {
                             if (isSelected() && isCreated && recycler != null) {
                                 contents = new ArrayList<>();
                                 Document document = Jsoup.parseBodyFragment(s);
+                                HtmlUtils.removeUselessAttributes(document);
                                 getChildren(document.getAllElements());
                                 if (contents.size() > 0)
                                     recycler.setAdapter(new ContentsAdapter(contents));
@@ -103,7 +105,8 @@ public class AnnouncementsFragment extends BaseFragment {
                                 if (children.get(i).tagName().equals("li")) {
                                     try {
                                         addItem(children.get(i));
-                                    } catch (Exception ignored) {
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
                                     }
                                 }
                             }
@@ -111,7 +114,7 @@ public class AnnouncementsFragment extends BaseFragment {
 
                         public void addItem(Element element) {
                             String title = element.getElementsByTag("h3").get(0).text();
-                            String description = element.getElementsByClass("vtbegenerated").get(0).text();
+                            String description = HtmlUtils.getBasicHtml(element.getElementsByClass("vtbegenerated").get(0));
                             String date = element.getElementsByClass("details").get(0).child(0).text();
                             String url = null;
                             if (element.getElementsByTag("iframe").size() > 0) {
