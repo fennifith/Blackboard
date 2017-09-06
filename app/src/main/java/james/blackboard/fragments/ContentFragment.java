@@ -17,12 +17,15 @@ public class ContentFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        title = getArguments().getString(EXTRA_TITLE);
         return new FrameLayout(getContext());
     }
 
     @Override
     public String getTitle() {
         return title != null ? title : "";
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }
