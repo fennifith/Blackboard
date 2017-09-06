@@ -33,6 +33,7 @@ public class HomeFragment extends BaseFragment {
     private TextView username;
     private ImageView logout;
     private TextView url;
+    private View refresh;
 
     private BaseScraper courseScraper;
     private BaseFragment fragment;
@@ -47,6 +48,7 @@ public class HomeFragment extends BaseFragment {
         username = view.findViewById(R.id.username);
         url = view.findViewById(R.id.url);
         logout = view.findViewById(R.id.logout);
+        refresh = view.findViewById(R.id.refresh);
 
         toolbar.setNavigationIcon(R.drawable.ic_drawer);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -66,6 +68,16 @@ public class HomeFragment extends BaseFragment {
                     public void onReceiveValue(String s) {
                     }
                 });
+            }
+        });
+
+        refresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (courseScraper.isCancelled() || courseScraper.isComplete()) {
+                    coursesLayout.removeAllViews();
+                    courseScraper.scrape();
+                }
             }
         });
 
