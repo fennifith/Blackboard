@@ -12,6 +12,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import james.blackboard.R;
+import james.blackboard.data.content.AnnouncementContentData;
 import james.blackboard.data.content.ContentData;
 import james.blackboard.data.content.FileContentData;
 import james.blackboard.data.content.FolderContentData;
@@ -27,54 +28,69 @@ public class ContentsAdapter extends RecyclerView.Adapter<ContentsAdapter.ViewHo
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_content, parent, false));
+        if (viewType == 4)
+            return new AnnouncementViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_announcement, parent, false));
+        else
+            return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_content, parent, false));
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        ContentData content = contents.get(position);
-        holder.title.setText(content.title);
-
-        if (content.description.length() > 0) {
-            holder.description.setVisibility(View.VISIBLE);
-            holder.description.setText(content.description);
-        } else holder.description.setVisibility(View.GONE);
-
         switch (getItemViewType(position)) {
-            case 1:
-                holder.image.setImageResource(R.drawable.ic_link);
-                holder.itemView.setTag(((WebLinkContentData) content).url);
-                holder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (view.getTag() != null && view.getTag() instanceof String)
-                            view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse((String) view.getTag())));
-                    }
-                });
-                break;
-            case 2:
-                holder.image.setImageResource(R.drawable.ic_folder);
-                holder.itemView.setTag(((FolderContentData) content).action);
-                holder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
+            case 4:
+                AnnouncementViewHolder announcementHolder = (AnnouncementViewHolder) holder;
+                AnnouncementContentData announcement = (AnnouncementContentData) contents.get(position);
 
-                    }
-                });
-                break;
-            case 3:
-                holder.image.setImageResource(R.drawable.ic_file);
-                holder.itemView.setTag(((FileContentData) content).url);
-                holder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (view.getTag() != null && view.getTag() instanceof String)
-                            view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse((String) view.getTag())));
-                    }
-                });
+                holder.title.setText(announcement.title);
+                holder.description.setText(announcement.description);
+                announcementHolder.date.setText(announcement.date);
                 break;
             default:
-                holder.image.setImageResource(R.drawable.ic_message);
+                ContentData content = contents.get(position);
+                holder.title.setText(content.title);
+
+                if (content.description.length() > 0) {
+                    holder.description.setVisibility(View.VISIBLE);
+                    holder.description.setText(content.description);
+                } else holder.description.setVisibility(View.GONE);
+
+                switch (getItemViewType(position)) {
+                    case 1:
+                        holder.image.setImageResource(R.drawable.ic_link);
+                        holder.itemView.setTag(((WebLinkContentData) content).url);
+                        holder.itemView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (view.getTag() != null && view.getTag() instanceof String)
+                                    view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse((String) view.getTag())));
+                            }
+                        });
+                        break;
+                    case 2:
+                        holder.image.setImageResource(R.drawable.ic_folder);
+                        holder.itemView.setTag(((FolderContentData) content).action);
+                        holder.itemView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                            }
+                        });
+                        break;
+                    case 3:
+                        holder.image.setImageResource(R.drawable.ic_file);
+                        holder.itemView.setTag(((FileContentData) content).url);
+                        holder.itemView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (view.getTag() != null && view.getTag() instanceof String)
+                                    view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse((String) view.getTag())));
+                            }
+                        });
+                        break;
+                    default:
+                        holder.image.setImageResource(R.drawable.ic_message);
+                        break;
+                }
                 break;
         }
     }
@@ -87,6 +103,8 @@ public class ContentsAdapter extends RecyclerView.Adapter<ContentsAdapter.ViewHo
             return 2;
         else if (contents.get(position) instanceof FileContentData)
             return 3;
+        else if (contents.get(position) instanceof AnnouncementContentData)
+            return 4;
 
         return 0;
     }
@@ -107,6 +125,16 @@ public class ContentsAdapter extends RecyclerView.Adapter<ContentsAdapter.ViewHo
             title = itemView.findViewById(R.id.title);
             description = itemView.findViewById(R.id.description);
             image = itemView.findViewById(R.id.image);
+        }
+    }
+
+    private static class AnnouncementViewHolder extends ViewHolder {
+
+        private TextView date;
+
+        public AnnouncementViewHolder(View itemView) {
+            super(itemView);
+            date = itemView.findViewById(R.id.date);
         }
     }
 

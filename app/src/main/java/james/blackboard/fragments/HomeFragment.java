@@ -94,6 +94,20 @@ public class HomeFragment extends BaseFragment {
                         Document document = Jsoup.parseBodyFragment(s);
                         coursesLayout.removeAllViews();
                         getChildren(document.getAllElements());
+
+                        getBlackboard().sendAction("/webapps/blackboard/execute/announcement?method=search&context=course_entry&course_id=_5381_1&handle=announcements_entry&mode=view");
+                        boolean shouldAdd = fragment == null;
+                        fragment = new CourseFragment();
+                        if (shouldAdd) {
+                            getChildFragmentManager().beginTransaction()
+                                    .add(R.id.fragment, fragment)
+                                    .commit();
+                        } else {
+                            getChildFragmentManager().beginTransaction()
+                                    .replace(R.id.fragment, fragment)
+                                    .commit();
+                        }
+
                     }
 
                     @Override

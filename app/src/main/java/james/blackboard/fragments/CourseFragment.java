@@ -70,10 +70,16 @@ public class CourseFragment extends BaseFragment {
                         if (strings.contains(text) || text.equals("Home Page") || text.equals("Help"))
                             return;
 
-                        ContentFragment fragment = new ContentFragment();
-                        fragment.setData(text, element.attr("href"));
+                        if (text.equals("Announcements")) {
+                            AnnouncementsFragment fragment = new AnnouncementsFragment();
+                            fragment.setUrl(element.attr("href"));
+                            fragments.add(fragment);
+                        } else {
+                            ContentFragment fragment = new ContentFragment();
+                            fragment.setData(text, element.attr("href"));
+                            fragments.add(fragment);
+                        }
 
-                        fragments.add(fragment);
                         strings.add(text);
                     }
                 })

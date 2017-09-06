@@ -18,16 +18,14 @@ import java.util.List;
 
 import james.blackboard.R;
 import james.blackboard.adapters.ContentsAdapter;
+import james.blackboard.data.content.AnnouncementContentData;
 import james.blackboard.data.content.ContentData;
-import james.blackboard.data.content.FileContentData;
-import james.blackboard.data.content.FolderContentData;
 import james.blackboard.data.content.WebLinkContentData;
+import james.blackboard.utils.scrapers.AnnouncementsScraper;
 import james.blackboard.utils.scrapers.BaseScraper;
-import james.blackboard.utils.scrapers.ContentScraper;
 
-public class ContentFragment extends BaseFragment {
+public class AnnouncementsFragment extends BaseFragment {
 
-    private String title;
     private String url;
 
     private RecyclerView recycler;
@@ -58,11 +56,10 @@ public class ContentFragment extends BaseFragment {
 
     @Override
     public String getTitle() {
-        return title != null ? title : "";
+        return "Announcements";
     }
 
-    public void setData(String title, String url) {
-        this.title = title;
+    public void setUrl(String url) {
         this.url = url;
     }
 
@@ -80,8 +77,8 @@ public class ContentFragment extends BaseFragment {
 
     @Override
     public void onPageFinished(String url) {
-        if (isSelected() && isCreated && (scraper == null || scraper.isCancelled() || scraper.isComplete())) {
-            scraper = new ContentScraper(getBlackboard())
+        if (isSelected() && isCreated && scraper == null || scraper.isCancelled() || scraper.isComplete()) {
+            scraper = new AnnouncementsScraper(getBlackboard())
                     .addCallback(new BaseScraper.ScrapeCallback() {
 
                         private List<ContentData> contents;
@@ -103,38 +100,32 @@ public class ContentFragment extends BaseFragment {
 
                         public void getChildren(Elements children) {
                             for (int i = 0; i < children.size(); i++) {
-                                Element child = children.get(i);
-                                if (child.tagName().equals("div") || child.tagName().equals("ul"))
-                                    getChildren(child.children());
-                                else if (child.tagName().equals("li"))
-                                    addItem(child);
+                                if (children.get(i).tagName().equals("li")) {
+                                    try {
+                                        addItem(children.get(i));
+                                    } catch (Exception ignored) {
+                                    }
+                                }
                             }
                         }
 
                         public void addItem(Element element) {
-                            if (element.id().startsWith("contentListItem")) {
-                                String title = element.getElementsByTag("h3").get(0).text();
-                                String description = element.getElementsByClass("details").get(0).text();
-                                String type = element.getElementsByTag("img").get(0).attr("alt");
-
-                                ContentData content;
-                                switch (type) {
-                                    case "Web Link":
-                                        content = new WebLinkContentData(title, description, element.getElementsByTag("a").get(0).attr("href"));
-                                        break;
-                                    case "Content Folder":
-                                        content = new FolderContentData(title, description, element.getElementsByTag("a").get(0).attr("href"));
-                                        break;
-                                    case "File":
-                                        content = new FileContentData(title, description, getBlackboard().getFullUrl() + element.getElementsByTag("a").get(0).attr("href"));
-                                        break;
-                                    default:
-                                        content = new ContentData(title, description);
-                                        break;
-                                }
-
-                                contents.add(content);
+                            String title = element.getElementsByTag("h3").get(0).text();
+                            String description = element.getElementsByClass("vtbegenerated").get(0).text();
+                            String date = element.getElementsByClass("details").get(0).child(0).text();
+                            String url = null;
+                            if (element.getElementsByTag("iframe").size() > 0) {
+                                Element iframe = element.getElementsByTag("iframe").get(0);
+                                if (iframe.hasAttr("src"))
+                                    url = iframe.attr("src");
                             }
+
+                            ContentData content;
+                            if (url != null)
+                                content = new WebLinkContentData(title, date, url);
+                            else content = new AnnouncementContentData(title, description, date);
+
+                            contents.add(content);
                         }
                     });
 
