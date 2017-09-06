@@ -2,17 +2,25 @@ package james.blackboard.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import james.blackboard.R;
+import james.blackboard.adapters.ContentsAdapter;
+import james.blackboard.data.ContentData;
+import james.blackboard.data.FolderContentData;
+import james.blackboard.data.WebLinkData;
 import james.blackboard.utils.scrapers.BaseScraper;
 import james.blackboard.utils.scrapers.ContentScraper;
 
@@ -21,16 +29,22 @@ public class ContentFragment extends BaseFragment {
     private String title;
     private String url;
 
+    private RecyclerView recycler;
+
     private BaseScraper scraper;
     private boolean isCreated;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        isCreated = true;
+        View view = inflater.inflate(R.layout.fragment_content, container, false);
+        recycler = view.findViewById(R.id.recycler);
+        recycler.setLayoutManager(new LinearLayoutManager(getContext()));
+
         if (isSelected())
             getBlackboard().sendAction(url);
-        return new FrameLayout(getContext());
+        isCreated = true;
+        return view;
     }
 
     @Override
@@ -59,7 +73,8 @@ public class ContentFragment extends BaseFragment {
 
     @Override
     void onDeselect() {
-        scraper.cancel();
+        if (scraper != null)
+            scraper.cancel();
     }
 
     @Override
@@ -68,10 +83,17 @@ public class ContentFragment extends BaseFragment {
             scraper = new ContentScraper(getBlackboard())
                     .addCallback(new BaseScraper.ScrapeCallback() {
 
+                        private List<ContentData> contents;
+
                         @Override
                         public void onComplete(BaseScraper scraper, String s) {
-                            Document document = Jsoup.parseBodyFragment(s);
-                            getChildren(document.getAllElements());
+                            if (isSelected() && isCreated && recycler != null) {
+                                contents = new ArrayList<>();
+                                Document document = Jsoup.parseBodyFragment(s);
+                                getChildren(document.getAllElements());
+                                if (contents.size() > 0)
+                                    recycler.setAdapter(new ContentsAdapter(contents));
+                            }
                         }
 
                         @Override
@@ -90,7 +112,24 @@ public class ContentFragment extends BaseFragment {
 
                         public void addItem(Element element) {
                             if (element.id().startsWith("contentListItem")) {
-                                Log.d("HTML", element.html());
+                                String title = element.getElementsByTag("h3").get(0).text();
+                                String description = element.getElementsByClass("details").get(0).text();
+                                String type = element.getElementsByTag("img").get(0).attr("alt");
+
+                                ContentData content;
+                                switch (type) {
+                                    case "Web Link":
+                                        content = new WebLinkData(title, description, element.getElementsByTag("a").get(0).attr("href"));
+                                        break;
+                                    case "Content Folder":
+                                        content = new FolderContentData(title, description, element.getElementsByTag("a").get(0).attr("href"));
+                                        break;
+                                    default:
+                                        content = new ContentData(title, description);
+                                        break;
+                                }
+
+                                contents.add(content);
                             }
                         }
                     });
