@@ -31,7 +31,4 @@ dependencies {
     compile 'com.android.support:cardview-v7:26.0.2'
     compile 'com.afollestad:aesthetic:0.4.6'
     compile 'org.jsoup:jsoup:1.10.3'
-    compile('com.mikepenz:materialdrawer:5.9.5@aar') {
-        transitive = true
-    }
 }

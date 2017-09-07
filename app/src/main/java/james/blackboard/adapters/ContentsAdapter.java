@@ -14,6 +14,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import james.blackboard.R;
+import james.blackboard.data.BreadcrumbData;
 import james.blackboard.data.content.AnnouncementContentData;
 import james.blackboard.data.content.ContentData;
 import james.blackboard.data.content.FileContentData;
@@ -23,9 +24,14 @@ import james.blackboard.data.content.WebLinkContentData;
 public class ContentsAdapter extends RecyclerView.Adapter<ContentsAdapter.ViewHolder> {
 
     private List<ContentData> contents;
+    private BreadcrumbsAdapter.BreadcrumbCallback callback;
 
     public ContentsAdapter(List<ContentData> contents) {
         this.contents = contents;
+    }
+
+    public void setBreadcrumbCallback(BreadcrumbsAdapter.BreadcrumbCallback callback) {
+        this.callback = callback;
     }
 
     @Override
@@ -72,11 +78,14 @@ public class ContentsAdapter extends RecyclerView.Adapter<ContentsAdapter.ViewHo
                         break;
                     case 2:
                         holder.image.setImageResource(R.drawable.ic_folder);
-                        holder.itemView.setTag(((FolderContentData) content).action);
+                        holder.itemView.setTag(position);
                         holder.itemView.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-
+                                if (callback != null && view.getTag() != null && view.getTag() instanceof Integer) {
+                                    FolderContentData folder = (FolderContentData) contents.get((Integer) view.getTag());
+                                    callback.moveTo(new BreadcrumbData(folder.title, folder.action));
+                                }
                             }
                         });
                         break;
