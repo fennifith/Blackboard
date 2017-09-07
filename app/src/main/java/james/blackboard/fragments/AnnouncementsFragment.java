@@ -30,6 +30,7 @@ public class AnnouncementsFragment extends BaseFragment {
     private String url;
 
     private RecyclerView recycler;
+    private View empty;
 
     private BaseScraper scraper;
     private boolean isCreated;
@@ -39,6 +40,8 @@ public class AnnouncementsFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_content, container, false);
         recycler = view.findViewById(R.id.recycler);
+        empty = view.findViewById(R.id.empty);
+
         recycler.setLayoutManager(new LinearLayoutManager(getContext()));
 
         if (isSelected())
@@ -91,6 +94,7 @@ public class AnnouncementsFragment extends BaseFragment {
                                 Document document = Jsoup.parseBodyFragment(s);
                                 HtmlUtils.removeUselessAttributes(document);
                                 getChildren(document.getAllElements());
+                                empty.setVisibility(contents.size() > 0 ? View.GONE : View.VISIBLE);
                                 if (contents.size() > 0)
                                     recycler.setAdapter(new ContentsAdapter(contents));
                             }

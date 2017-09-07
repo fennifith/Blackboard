@@ -36,6 +36,7 @@ public class ContentFragment extends BaseFragment implements BreadcrumbsAdapter.
     private RecyclerView recycler;
     private RecyclerView breadcrumbsView;
     private BreadcrumbsAdapter breadcrumbsAdapter;
+    private View empty;
 
     private BaseScraper scraper;
     private boolean isCreated;
@@ -46,6 +47,7 @@ public class ContentFragment extends BaseFragment implements BreadcrumbsAdapter.
         View view = inflater.inflate(R.layout.fragment_content, container, false);
         recycler = view.findViewById(R.id.recycler);
         breadcrumbsView = view.findViewById(R.id.breadcrumbs);
+        empty = view.findViewById(R.id.empty);
 
         recycler.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -104,6 +106,7 @@ public class ContentFragment extends BaseFragment implements BreadcrumbsAdapter.
                                 Document document = Jsoup.parseBodyFragment(s);
                                 HtmlUtils.removeUselessAttributes(document);
                                 getChildren(document.getAllElements());
+                                empty.setVisibility(contents.size() > 0 ? View.GONE : View.VISIBLE);
                                 if (contents.size() > 0) {
                                     ContentsAdapter adapter = new ContentsAdapter(contents);
                                     adapter.setBreadcrumbCallback(ContentFragment.this);
