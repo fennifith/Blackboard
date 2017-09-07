@@ -24,17 +24,20 @@ import java.util.List;
 import james.blackboard.R;
 import james.blackboard.utils.scrapers.BaseScraper;
 import james.blackboard.utils.scrapers.CourseScraper;
+import james.blackboard.utils.scrapers.OrganizationScraper;
 import james.blackboard.utils.scrapers.UsernameScraper;
 
 public class HomeFragment extends BaseFragment {
 
     private DrawerLayout drawerLayout;
+    private LinearLayout organizationsLayout;
     private LinearLayout coursesLayout;
     private TextView username;
     private ImageView logout;
     private TextView url;
     private View refresh;
 
+    private BaseScraper organizationScraper;
     private BaseScraper courseScraper;
     private BaseFragment fragment;
 
@@ -44,6 +47,7 @@ public class HomeFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         final Toolbar toolbar = view.findViewById(R.id.toolbar);
         drawerLayout = view.findViewById(R.id.drawerLayout);
+        organizationsLayout = view.findViewById(R.id.organizations);
         coursesLayout = view.findViewById(R.id.courses);
         username = view.findViewById(R.id.username);
         url = view.findViewById(R.id.url);
@@ -95,6 +99,79 @@ public class HomeFragment extends BaseFragment {
                 })
                 .scrape();
 
+        organizationScraper = new OrganizationScraper(getBlackboard())
+                .addCallback(new BaseScraper.ScrapeCallback() {
+
+                    List<String> organizations;
+
+                    @Override
+                    public void onComplete(BaseScraper scraper, String s) {
+                        organizations = new ArrayList<>();
+                        Document document = Jsoup.parseBodyFragment(s);
+                        organizationsLayout.removeAllViews();
+                        getChildren(document.getAllElements());
+
+                        if (organizationsLayout.getChildCount() > 0)
+                            organizationsLayout.getChildAt(0).performClick();
+                        else organizationScraper.scrape();
+                    }
+
+                    @Override
+                    public void onError(BaseScraper scraper, boolean fatal) {
+
+                    }
+
+                    public void getChildren(Elements children) {
+                        for (int i = 0; i < children.size(); i++) {
+                            Element child = children.get(i);
+                            if (child.tagName().equals("a"))
+                                addView(child);
+                        }
+                    }
+
+                    public void addView(Element element) {
+                        if (organizations.contains(element.text()))
+                            return;
+
+                        View view = LayoutInflater.from(getContext()).inflate(R.layout.item_drawer, organizationsLayout, false);
+                        ImageView icon = view.findViewById(R.id.icon);
+                        TextView title = view.findViewById(R.id.title);
+
+                        icon.setImageResource(R.drawable.ic_class);
+                        title.setText(element.text());
+                        String onclick = element.attributes().get("onclick").replace("return false;", "");
+                        view.setTag(onclick.substring(0, onclick.length() - 1));
+                        view.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (view.getTag() != null && view.getTag() instanceof String) {
+                                    toolbar.setTitle(((TextView) view.findViewById(R.id.title)).getText().toString());
+                                    drawerLayout.closeDrawer(GravityCompat.START);
+                                    getBlackboard().callFunction((String) view.getTag(), new ValueCallback<String>() {
+                                        @Override
+                                        public void onReceiveValue(String s) {
+                                            boolean shouldAdd = fragment == null;
+                                            fragment = new CourseFragment();
+                                            if (shouldAdd) {
+                                                getChildFragmentManager().beginTransaction()
+                                                        .add(R.id.fragment, fragment)
+                                                        .commit();
+                                            } else {
+                                                getChildFragmentManager().beginTransaction()
+                                                        .replace(R.id.fragment, fragment)
+                                                        .commit();
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        });
+
+                        organizationsLayout.addView(view);
+                        organizations.add(element.text());
+                    }
+                });
+
         courseScraper = new CourseScraper(getBlackboard())
                 .addCallback(new BaseScraper.ScrapeCallback() {
 
@@ -107,19 +184,9 @@ public class HomeFragment extends BaseFragment {
                         coursesLayout.removeAllViews();
                         getChildren(document.getAllElements());
 
-                        getBlackboard().sendAction("/webapps/blackboard/execute/announcement?method=search&context=course_entry&course_id=_5381_1&handle=announcements_entry&mode=view");
-                        boolean shouldAdd = fragment == null;
-                        fragment = new CourseFragment();
-                        if (shouldAdd) {
-                            getChildFragmentManager().beginTransaction()
-                                    .add(R.id.fragment, fragment)
-                                    .commit();
-                        } else {
-                            getChildFragmentManager().beginTransaction()
-                                    .replace(R.id.fragment, fragment)
-                                    .commit();
-                        }
-
+                        if (courses.size() > 0)
+                            organizationScraper.scrape();
+                        else courseScraper.scrape();
                     }
 
                     @Override
@@ -129,9 +196,7 @@ public class HomeFragment extends BaseFragment {
                     public void getChildren(Elements children) {
                         for (int i = 0; i < children.size(); i++) {
                             Element child = children.get(i);
-                            if (child.tagName().equals("div") || child.tagName().equals("li") || child.tagName().equals("ul"))
-                                getChildren(child.children());
-                            else if (child.tagName().equals("span") || child.tagName().equals("a"))
+                            if (child.tagName().equals("span") || child.tagName().equals("a"))
                                 addView(child);
                         }
                     }
@@ -180,7 +245,6 @@ public class HomeFragment extends BaseFragment {
                         }
 
                         coursesLayout.addView(view);
-
                         courses.add(element.text());
                     }
 

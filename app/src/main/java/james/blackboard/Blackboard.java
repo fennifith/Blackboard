@@ -70,6 +70,10 @@ public class Blackboard extends Application {
         webView.evaluateJavascript("(function(){return document.getElementById('" + id + "').innerHTML;})()", callback);
     }
 
+    public void getHtmlContentByClassName(String className, int i, ValueCallback<String> callback) {
+        webView.evaluateJavascript("(function(){return document.getElementsByClassName('" + className + "')[" + i + "].innerHTML;})()", callback);
+    }
+
     public void setAttribute(String id, String attribute, String value) {
         webView.evaluateJavascript("(function(){document.getElementById('" + id + "')." + attribute + " = " + value + ";})();", new ValueCallback<String>() {
             @Override
