@@ -86,14 +86,13 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:fadingEdge="vertical"
-            android:fadingEdgeLength="8dp"
-            android:requiresFadingEdge="vertical"
             android:scrollbars="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -111,6 +110,11 @@
             </LinearLayout>
 
         </ScrollView>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dip"
+            android:background="#1FFFFFFF"/>
 
         <LinearLayout
             android:id="@+id/refresh"
