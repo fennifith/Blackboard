@@ -137,7 +137,7 @@ public class HomeFragment extends BaseFragment {
                         ImageView icon = view.findViewById(R.id.icon);
                         TextView title = view.findViewById(R.id.title);
 
-                        icon.setImageResource(R.drawable.ic_class);
+                        icon.setImageResource(R.drawable.ic_group);
                         title.setText(element.text());
                         String onclick = element.attributes().get("onclick").replace("return false;", "");
                         view.setTag(onclick.substring(0, onclick.length() - 1));
