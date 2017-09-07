@@ -16,6 +16,8 @@ import java.util.List;
 import james.blackboard.R;
 import james.blackboard.data.BreadcrumbData;
 import james.blackboard.data.content.AnnouncementContentData;
+import james.blackboard.data.content.AssignmentContentData;
+import james.blackboard.data.content.BlankPageContentData;
 import james.blackboard.data.content.ContentData;
 import james.blackboard.data.content.FileContentData;
 import james.blackboard.data.content.FolderContentData;
@@ -61,7 +63,7 @@ public class ContentsAdapter extends RecyclerView.Adapter<ContentsAdapter.ViewHo
                 if (content.description.length() > 0) {
                     holder.description.setVisibility(View.VISIBLE);
                     holder.description.setText(Html.fromHtml(content.description));
-                    holder.description.setMovementMethod(getItemViewType(position) == 0 ? LinkMovementMethod.getInstance() : null);
+                    holder.description.setMovementMethod(LinkMovementMethod.getInstance());
                 } else holder.description.setVisibility(View.GONE);
 
                 switch (getItemViewType(position)) {
@@ -100,6 +102,28 @@ public class ContentsAdapter extends RecyclerView.Adapter<ContentsAdapter.ViewHo
                             }
                         });
                         break;
+                    case 5:
+                        holder.image.setImageResource(R.drawable.ic_assignment);
+                        holder.itemView.setTag(((AssignmentContentData) content).url);
+                        holder.itemView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (view.getTag() != null && view.getTag() instanceof String)
+                                    view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse((String) view.getTag())));
+                            }
+                        });
+                        break;
+                    case 6:
+                        holder.image.setImageResource(R.drawable.ic_reading);
+                        holder.itemView.setTag(((BlankPageContentData) content).url);
+                        holder.itemView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (view.getTag() != null && view.getTag() instanceof String)
+                                    view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse((String) view.getTag())));
+                            }
+                        });
+                        break;
                     default:
                         holder.image.setImageResource(R.drawable.ic_message);
                         break;
@@ -118,6 +142,10 @@ public class ContentsAdapter extends RecyclerView.Adapter<ContentsAdapter.ViewHo
             return 3;
         else if (contents.get(position) instanceof AnnouncementContentData)
             return 4;
+        else if (contents.get(position) instanceof AssignmentContentData)
+            return 5;
+        else if (contents.get(position) instanceof BlankPageContentData)
+            return 6;
 
         return 0;
     }

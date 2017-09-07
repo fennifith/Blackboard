@@ -21,6 +21,8 @@ import james.blackboard.R;
 import james.blackboard.adapters.BreadcrumbsAdapter;
 import james.blackboard.adapters.ContentsAdapter;
 import james.blackboard.data.BreadcrumbData;
+import james.blackboard.data.content.AssignmentContentData;
+import james.blackboard.data.content.BlankPageContentData;
 import james.blackboard.data.content.ContentData;
 import james.blackboard.data.content.FileContentData;
 import james.blackboard.data.content.FolderContentData;
@@ -142,6 +144,12 @@ public class ContentFragment extends BaseFragment implements BreadcrumbsAdapter.
                                         break;
                                     case "Content Folder":
                                         content = new FolderContentData(title, description, element.getElementsByTag("a").get(0).attr("href"));
+                                        break;
+                                    case "Assignment":
+                                        content = new AssignmentContentData(title, description, getBlackboard().getFullUrl() + element.getElementsByTag("a").get(0).attr("href"));
+                                        break;
+                                    case "Blank Page":
+                                        content = new BlankPageContentData(title, description, getBlackboard().getFullUrl() + element.getElementsByTag("a").get(0).attr("href"));
                                         break;
                                     case "File":
                                         content = new FileContentData(title, description, getBlackboard().getFullUrl() + element.getElementsByTag("a").get(0).attr("href"));
