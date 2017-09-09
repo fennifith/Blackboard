@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -178,13 +177,15 @@ public class ContentFragment extends BaseFragment implements BreadcrumbsAdapter.
                 int size = breadcrumbs.size();
                 breadcrumbs.subList(index + 1, size).clear();
                 breadcrumbsAdapter.notifyItemRangeRemoved(index, size - index);
+                breadcrumbsAdapter.notifyItemChanged(index);
             } else {
                 breadcrumbs.add(breadcrumb);
                 breadcrumbsAdapter.notifyItemInserted(breadcrumbs.size() - 1);
+                breadcrumbsAdapter.notifyItemChanged(breadcrumbs.size() - 2);
+                breadcrumbsView.smoothScrollToPosition(breadcrumbs.size() - 1);
             }
 
             breadcrumbsView.setVisibility(breadcrumbs.size() > 1 ? View.VISIBLE : View.GONE);
-            Log.d("Breadcrumbs", breadcrumbs.toString());
         }
     }
 }
