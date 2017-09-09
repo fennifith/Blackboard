@@ -39,8 +39,13 @@ public class MainActivity extends AestheticActivity implements FragmentManager.O
                     .add(R.id.fragment, fragment)
                     .commit();
         } else {
-            if (fragment == null)
+            if (fragment == null) {
                 fragment = new LoginFragment();
+
+                String url = blackboard.getUrl();
+                if (url != null)
+                    blackboard.loadUrl(url);
+            }
 
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment, fragment)
